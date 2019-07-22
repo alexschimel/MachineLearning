@@ -1,6 +1,5 @@
 import numpy
-import tensorflow as tf
-from tensorflow import keras
+from sklearn import linear_model, metrics
 import argparse
 import cv2
 import glob
@@ -19,13 +18,13 @@ def loadImages(filenames):
 	im = cv2.imread(filenames[0])
 	n0, n1 = im.shape[:2]
 	numImages = len(filenames)
-	inputData = numpy.zeros((numImages, n0*n1), numpy.float32)
+	inputData = numpy.zeros((numImages, n0, n1), numpy.float32)
 	for i in range(numImages):
 		fn = filenames[i]
 		# extract the index from the file name, note: the index starts with 1
 		index = int(re.search(r'img(\d+).jpg', fn).group(1)) - 1
 		im = cv2.imread(fn)
-		inputData[index,:] = (im.mean(axis=2)/255.).flat
+		inputData[index,...] = im.mean(axis=2) / 255.
 	return inputData
 
 def getImageSizes(filename):
@@ -66,20 +65,15 @@ print('Image size               : {} x {}'.format(n0, n1))
 print('Categories               : {} min/max = {}/{}'.format(categories, minNumDots, maxNumDots))
 
 
-clf = keras.Sequential()
-clf.add( keras.layers.Dense(32, input_shape=(n0*n1,), activation='relu') )
-clf.add( keras.layers.Dense(1,) )
+clf = linear_model.LinearRegression()
 
-clf.compile(optimizer='adam',
-	        loss='mean_squared_error', 
-            metrics=['accuracy'])
 # now train
-clf.fit(trainingInput, trainingOutput, epochs=100)
+clf.fit(trainingInput.reshape(-1, n0*n1), trainingOutput)
 
 # test
-predictions = numpy.squeeze(clf.predict(testingInput))
-numPredictions = predictions.shape[0]
+predictions = clf.predict(testingInput.reshape(-1, n0*n1))
 
+numPredictions = predictions.shape[0]
 predictedNumDots = (maxNumDots - minNumDots)*predictions + minNumDots
 exactNumDots = (maxNumDots - minNumDots)*testingOutput + minNumDots
 
@@ -98,7 +92,7 @@ from matplotlib import pylab
 n = 30
 for i in range(n):
 	pylab.subplot(n//10, 10, i + 1)
-	pylab.imshow(testingInput[i,...].reshape(n0, n1))
+	pylab.imshow(testingInput[i,...])
 	pylab.title('{} ({:.1f})'.format(int(exactNumDots[i]), predictedNumDots[i]))
 	pylab.axis('off')
 pylab.show()

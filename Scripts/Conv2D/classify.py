@@ -94,6 +94,7 @@ clf.fit(trainingInput, trainingOutput, epochs=10)
 
 # test
 predictions = numpy.squeeze(clf.predict(testingInput))
+numPredictions = predictions.shape[0]
 
 predictedNumDots = (maxNumDots - minNumDots)*predictions + minNumDots
 exactNumDots = (maxNumDots - minNumDots)*testingOutput + minNumDots
@@ -103,7 +104,7 @@ diffs = (numpy.round(predictedNumDots) - exactNumDots)**2
 varError = diffs.sum()
 numFailures = (diffs != 0).sum()
 
-print('variance of error = {} number of failures = {}'.format(varError, numFailures))
+print('sum of errors squared = {} number of failures = {} ({} %)'.format(varError, numFailures, 100*numFailures/numPredictions))
 
 print('known number of dots for the first 5 images   : {}'.format(exactNumDots[:5]))
 print('inferred number of dots for the first 5 images: {}'.format(predictedNumDots[:5]))
@@ -117,11 +118,5 @@ for i in range(n):
 	pylab.title('{} ({:.1f})'.format(int(exactNumDots[i]), predictedNumDots[i]))
 	pylab.axis('off')
 pylab.show()
-
-
-
-
-
-
 
 
