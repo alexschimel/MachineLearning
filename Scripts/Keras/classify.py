@@ -67,19 +67,18 @@ print('Categories               : {} min/max = {}/{}'.format(categories, minNumD
 
 
 clf = keras.Sequential()
-clf.add( keras.layers.Dense(128, input_shape=(n0*n1,)) )
-clf.add( keras.layers.Dense(64) )
-clf.add( keras.layers.Dense(32) )
-clf.add( keras.layers.Dense(1) )
+clf.add( keras.layers.Dense(32, input_shape=(n0*n1,), activation='relu') )
+clf.add( keras.layers.Dense(1,) )
 
 clf.compile(optimizer='adam',
 	        loss='mean_squared_error', 
             metrics=['accuracy'])
 # now train
-clf.fit(trainingInput, trainingOutput, epochs=50)
+clf.fit(trainingInput, trainingOutput, epochs=100)
 
 # test
 predictions = numpy.squeeze(clf.predict(testingInput))
+numPredictions = predictions.shape[0]
 
 predictedNumDots = (maxNumDots - minNumDots)*predictions + minNumDots
 exactNumDots = (maxNumDots - minNumDots)*testingOutput + minNumDots
@@ -89,7 +88,7 @@ diffs = (numpy.round(predictedNumDots) - exactNumDots)**2
 varError = diffs.sum()
 numFailures = (diffs != 0).sum()
 
-print('variance of error = {} number of failures = {}'.format(varError, numFailures))
+print('sum square of error = {} number of failures = {} ({} %)'.format(varError, numFailures, 100*numFailures/numPredictions))
 
 print('known number of dots for the first 5 images   : {}'.format(exactNumDots[:5]))
 print('inferred number of dots for the first 5 images: {}'.format(predictedNumDots[:5]))
