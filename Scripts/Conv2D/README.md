@@ -3,7 +3,7 @@
 # Install the software
 
 ```
-pip install scikit-learn opencv-python
+pip install tf-nightly opencv-python
 ```
 
 # Train and test the model

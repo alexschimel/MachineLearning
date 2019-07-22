@@ -73,6 +73,7 @@ clf.fit(trainingInput.reshape(-1, n0*n1), trainingOutput)
 # test
 predictions = clf.predict(testingInput.reshape(-1, n0*n1))
 
+numPredictions = predictions.shape[0]
 predictedNumDots = (maxNumDots - minNumDots)*predictions + minNumDots
 exactNumDots = (maxNumDots - minNumDots)*testingOutput + minNumDots
 
@@ -81,7 +82,7 @@ diffs = (numpy.round(predictedNumDots) - exactNumDots)**2
 varError = diffs.sum()
 numFailures = (diffs != 0).sum()
 
-print('variance of error = {} number of failures = {}'.format(varError, numFailures))
+print('sum square of error = {} number of failures = {} ({} %)'.format(varError, numFailures, 100*numFailures/numPredictions))
 
 print('known number of dots for the first 5 images   : {}'.format(exactNumDots[:5]))
 print('inferred number of dots for the first 5 images: {}'.format(predictedNumDots[:5]))
