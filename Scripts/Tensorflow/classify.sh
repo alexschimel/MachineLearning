@@ -4,18 +4,17 @@
 curl -LO https://github.com/tensorflow/hub/raw/master/examples/image_retraining/retrain.py
 curl -LO https://github.com/tensorflow/tensorflow/raw/master/tensorflow/examples/label_image/label_image.py
 
-rm -rf train test
+rm -rf train
 
-for dir in "train" "test"; do
-    for line in $(cat ../../Data/Synthetic/Dots/${dir}/${dir}.csv); do
-        id=$(echo $line | awk -F, '{print $2}')
-        if [ $id != "\"imageId\"" ]; then
-            numDots=$(echo $line | awk -F, '{print $3}')
-            mkdir -p ${dir}/$numDots
-            echo "copying ../../Data/Synthetic/Dots/${dir}/img${id}.jpg to ${dir}/$numDots"
-            cp ../../Data/Synthetic/Dots/${dir}/img${id}.jpg ${dir}/$numDots
-        fi
-    done
+dir="train"
+for line in $(cat ../../Data/Synthetic/Dots/${dir}/${dir}.csv); do
+    id=$(echo $line | awk -F, '{print $2}')
+    if [ $id != "\"imageId\"" ]; then
+        numDots=$(echo $line | awk -F, '{print $3}')
+        mkdir -p ${dir}/$numDots
+        echo "copying ../../Data/Synthetic/Dots/${dir}/img${id}.jpg to ${dir}/$numDots"
+        cp ../../Data/Synthetic/Dots/${dir}/img${id}.jpg ${dir}/$numDots
+    fi
 done
 
 echo "retrain model..."
@@ -44,16 +43,16 @@ for line in $(cat ../../Data/Synthetic/Dots/test/test.csv); do
     gotNumDots=$(python findNumDots.py result.txt)
     diffSquare=$(python -c "print(($numDots - $gotNumDots)**2)")
     if [ $diffSquare != "0" ]; then
-      echo "found $gotNumDots in img${id}.jpg but there were $numDots dots"
+      echo "found $gotNumDots dot(s) in img${id}.jpg but there were $numDots"
       numFailures=$(python -c "print($numFailures + 1)")
     else
-      echo "found $numDots dots (correct)"
+      echo "found $numDots dot(s) (correct)"
     fi
     # update the score
     varError=$(python -c "print($varError + $diffSquare)")
   fi
   numPredictions=$(python -c "print($numPredictions + 1)")
 done
-percentFailures=$(python -c "print(100*$numFailures/$numPredictions")
+percentFailures=$(python -c "print(100*$numFailures/$numPredictions)")
 echo "sum of is errors squared: $varError number of failure: $numFailures ($percentFailures %)"
 
