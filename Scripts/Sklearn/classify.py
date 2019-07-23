@@ -64,7 +64,7 @@ print('Image size               : {} x {}'.format(n0, n1))
 print('Categories               : {} min/max = {}/{}'.format(categories, minNumDots, maxNumDots))
 
 #clf = svm.SVC(kernel='rbf', gamma='scale', verbose=True, random_state=567)
-clf = svm.SVC(kernel='rbf', gamma='scale', decision_function_shape='ovo', verbose=True, random_state=567)
+clf = svm.NuSVC(kernel='rbf', gamma='scale', decision_function_shape='ovo', verbose=True, random_state=567)
 
 
 # now train
@@ -80,9 +80,10 @@ diffs = (numDots - numDotsExact)**2
 score = diffs.sum()
 numFailures = (diffs != 0).sum()
 
-print('score = {} number of failures = {}'.format(score, numFailures))
+numTestingImages = prediction.shape[0]
+print('sum of errors squared = {} number of failures = {} ({} %)'.format(score, numFailures, 100*numFailures/numTestingImages))
 
-nImages = 10
+nImages = 20
 print('known number of dots for the first {} testing images: {}'.format(nImages, numDotsExact[:nImages]))
 print('inferred number dots for the first {} testing images: {}'.format(nImages, numDots[:nImages]))
 
