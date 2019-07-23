@@ -68,7 +68,7 @@ print('Categories               : {} min/max = {}/{}'.format(categories, minNumD
 
 clf = keras.Sequential()
 
-clf.add( keras.layers.Conv2D(32, kernel_size=(3,3), strides=(1,1),
+clf.add( keras.layers.Conv2D(64, kernel_size=(3,3), strides=(1,1),
                              padding='same', data_format='channels_last', activation='relu') )
 clf.add( keras.layers.MaxPooling2D(pool_size=(2, 2)) )
 
@@ -112,7 +112,8 @@ diffs = (numpy.round(predictedNumDots) - exactNumDots)**2
 varError = diffs.sum()
 numFailures = (diffs != 0).sum()
 
-print('variance of error = {} number of failures = {} error rate {}'.format(varError, numFailures, float(numFailures) / float(exactNumDots.size)))
+print('variance of error = {} number of failures = {} ({} %)'.format(varError, numFailures, 
+	  100*float(numFailures) / float(exactNumDots.size)))
 
 print('known number of dots for the first 5 images   : {}'.format(exactNumDots[:5]))
 print('inferred number of dots for the first 5 images: {}'.format(predictedNumDots[:5]))
