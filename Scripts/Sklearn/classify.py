@@ -63,24 +63,28 @@ print('Number of testing images : {}'.format(testingInput.shape[0]))
 print('Image size               : {} x {}'.format(n0, n1))
 print('Categories               : {} min/max = {}/{}'.format(categories, minNumDots, maxNumDots))
 
-clf = svm.SVC(kernel='rbf', gamma='scale', verbose=True, random_state=567)
+#clf = svm.SVC(kernel='rbf', gamma='scale', verbose=True, random_state=567)
+clf = svm.SVC(kernel='rbf', gamma='scale', decision_function_shape='ovo', verbose=True, random_state=567)
+
 
 # now train
 clf.fit(trainingInput, trainingOutput)
 
 # test
 prediction = clf.predict(testingInput)
-numDots = prediction + 1
+numDots = prediction + minNumDots
+numDotsExact = testingOutput + minNumDots
 
 # compute score
-diffs = (numDots - testingOutput)**2
+diffs = (numDots - numDotsExact)**2
 score = diffs.sum()
 numFailures = (diffs != 0).sum()
 
 print('score = {} number of failures = {}'.format(score, numFailures))
 
-print('known number of dots for the first 5 testing images: {}'.format(testingOutput[:5] + 1))
-print('inferred number dots for the first 5 testing images: {}'.format(prediction[:5] + 1))
+nImages = 10
+print('known number of dots for the first {} testing images: {}'.format(nImages, numDotsExact[:nImages]))
+print('inferred number dots for the first {} testing images: {}'.format(nImages, numDots[:nImages]))
 
 # plot training/test dataset
 from matplotlib import pylab
@@ -88,7 +92,7 @@ n = 30
 for i in range(n):
 	pylab.subplot(n//10, 10, i + 1)
 	pylab.imshow(testingInput[i,...].reshape(n0, n1))
-	pylab.title('{} ({})'.format(testingOutput[i] + minNumDots, numDots[i]))
+	pylab.title('{} ({})'.format(numDotsExact[i], numDots[i]))
 	pylab.axis('off')
 pylab.show()
 
