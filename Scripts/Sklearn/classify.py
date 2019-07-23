@@ -6,6 +6,20 @@ import glob
 import pandas
 import re
 
+parser = argparse.ArgumentParser(description='Count the dots.')
+parser.add_argument('--seed', type=int, default=13435, 
+                    help='Random seed')
+parser.add_argument('--trainDir', default='../../Data/Synthetic/Dots/train/',
+                    help='Path to the training data directory')
+parser.add_argument('--testDir', default='../../Data/Synthetic/Dots/test/',
+                    help='Path to the testing data directory')
+
+
+args = parser.parse_args()
+
+
+numpy.random.seed(args.seed)
+
 def loadImages(filenames):
 	"""
 	Load image files as grey data arrays
@@ -36,8 +50,7 @@ def getImageSizes(filename):
 	return im.shape[:2]
 
 
-dataDir = '../../Data/Synthetic/Dots/'
-trainingDir = dataDir + 'train/'
+trainingDir = args.trainDir
 
 df = pandas.read_csv(trainingDir + 'train.csv')
 categories = df['numberOfDots'].unique()
@@ -49,7 +62,8 @@ numCategories = maxNumDots - minNumDots + 1
 trainingOutput = numpy.array(df['numberOfDots']) - minNumDots
 trainingInput = loadImages(glob.glob(trainingDir + 'img*.jpg'))
 
-testingDir = dataDir + 'test/'
+testingDir = args.testDir
+
 df = pandas.read_csv(testingDir + 'test.csv')
 numCategories = len(categories)
 # labels start at zero
