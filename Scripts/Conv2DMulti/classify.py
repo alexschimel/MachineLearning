@@ -112,7 +112,7 @@ diffs = (numpy.round(predictedNumDots) - exactNumDots)**2
 varError = diffs.sum()
 numFailures = (diffs != 0).sum()
 
-print('variance of error = {} number of failures = {}'.format(varError, numFailures))
+print('variance of error = {} number of failures = {} error rate {}'.format(varError, numFailures, float(numFailures) / float(exactNumDots.size)))
 
 print('known number of dots for the first 5 images   : {}'.format(exactNumDots[:5]))
 print('inferred number of dots for the first 5 images: {}'.format(predictedNumDots[:5]))
