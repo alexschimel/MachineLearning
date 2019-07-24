@@ -125,6 +125,10 @@ print('known number of dots for the first 5 images   : {}'.format(exactNumDots[:
 print('inferred number of dots for the first 5 images: {}'.format(predictedNumDots[:5]))
 
 # plot training/test dataset
+import matplotlib
+if args.save:
+    # does not require X
+    matplotlib.use('Agg')
 from matplotlib import pylab
 n = 50
 for i in range(n):
