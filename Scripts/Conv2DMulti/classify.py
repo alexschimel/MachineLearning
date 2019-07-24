@@ -14,6 +14,8 @@ parser.add_argument('--trainDir', default='../../Data/Synthetic/Dots/train/',
                     help='Path to the training data directory')
 parser.add_argument('--testDir', default='../../Data/Synthetic/Dots/test/',
                     help='Path to the testing data directory')
+parser.add_argument('--plot', action='store_false',
+                    help='Turn off plotting')
 
 
 args = parser.parse_args()
@@ -138,12 +140,7 @@ for i in range(n):
 	pylab.imshow(testingInput[i,...].mean(axis=2))
 	pylab.title('{} ({})'.format(int(exactNumDots[i]), predictedNumDots[i]))
 	pylab.axis('off')
-pylab.show()
-
-
-
-
-
-
-
-
+if args.plot:
+    pylab.show()
+else:
+    pylab.savefig('someResults.png', dpi=300)

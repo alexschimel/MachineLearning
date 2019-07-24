@@ -13,7 +13,8 @@ parser.add_argument('--trainDir', default='../../Data/Synthetic/Dots/train/',
                     help='Path to the training data directory')
 parser.add_argument('--testDir', default='../../Data/Synthetic/Dots/test/',
                     help='Path to the testing data directory')
-
+parser.add_argument('--plot', action='store_false',
+                    help='Turn off plotting')
 
 args = parser.parse_args()
 
@@ -103,18 +104,18 @@ print('inferred number dots for the first {} testing images: {}'.format(nImages,
 
 # plot training/test dataset
 from matplotlib import pylab
-n = 30
+n = 50
 for i in range(n):
-	pylab.subplot(n//10, 10, i + 1)
-	pylab.imshow(testingInput[i,...].reshape(n0, n1))
-	pylab.title('{} ({})'.format(numDotsExact[i], numDots[i]))
-	pylab.axis('off')
-pylab.show()
-
-
-
-
-
-
-
+    pylab.subplot(n//10, 10, i + 1)
+    pylab.imshow(testingInput[i,...].reshape(n0, n1))
+    titleColor = 'black'
+    if int(numDotsExact[i]) != numpy.round(numDots[i]):
+        titleColor = 'red'
+    pylab.title('{} ({})'.format(numDotsExact[i], numDots[i]),
+        fontsize=8, color=titleColor)
+    pylab.axis('off')
+if args.plot:
+    pylab.show()
+else:
+    pylab.savefig('someResults.png', dpi=300)
 
