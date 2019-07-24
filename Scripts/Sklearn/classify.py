@@ -13,7 +13,8 @@ parser.add_argument('--trainDir', default='../../Data/Synthetic/Dots/train/',
                     help='Path to the training data directory')
 parser.add_argument('--testDir', default='../../Data/Synthetic/Dots/test/',
                     help='Path to the testing data directory')
-
+parser.add_argument('--plot', action='store_false',
+                    help='Turn off plotting')
 
 args = parser.parse_args()
 
@@ -21,33 +22,33 @@ args = parser.parse_args()
 numpy.random.seed(args.seed)
 
 def loadImages(filenames):
-	"""
-	Load image files as grey data arrays
-	@param filenames list of jpg file names
-	@return array of grey pixel data (1=white, 0=black)
-	"""
-	# open first file to get the image size
-	im = cv2.imread(filenames[0])
-	n0, n1 = im.shape[:2]
-	numImages = len(filenames)
-	inputData = numpy.zeros((numImages, n0*n1), numpy.float32)
-	for i in range(numImages):
-		fn = filenames[i]
-		# extract the index from the file name
-		index = int(re.search(r'img(\d+).jpg', fn).group(1)) - 1
-		im = cv2.imread(fn)
+    """
+    Load image files as grey data arrays
+    @param filenames list of jpg file names
+    @return array of grey pixel data (1=white, 0=black)
+    """
+    # open first file to get the image size
+    im = cv2.imread(filenames[0])
+    n0, n1 = im.shape[:2]
+    numImages = len(filenames)
+    inputData = numpy.zeros((numImages, n0*n1), numpy.float32)
+    for i in range(numImages):
+        fn = filenames[i]
+        # extract the index from the file name
+        index = int(re.search(r'img(\d+).jpg', fn).group(1)) - 1
+        im = cv2.imread(fn)
     # average the R, G, B channels and flatten array
-		inputData[index,:] = (im.mean(axis=2)/255.).flat
-	return inputData
+        inputData[index,:] = (im.mean(axis=2)/255.).flat
+    return inputData
 
 def getImageSizes(filename):
-	"""
-	Get the number of x and y pixels
-	@parameter filename file name
-	@return nx, ny
-	"""
-	im = cv2.imread(filename)
-	return im.shape[:2]
+    """
+    Get the number of x and y pixels
+    @parameter filename file name
+    @return nx, ny
+    """
+    im = cv2.imread(filename)
+    return im.shape[:2]
 
 
 trainingDir = args.trainDir
@@ -103,18 +104,18 @@ print('inferred number dots for the first {} testing images: {}'.format(nImages,
 
 # plot training/test dataset
 from matplotlib import pylab
-n = 30
+n = 50
 for i in range(n):
-	pylab.subplot(n//10, 10, i + 1)
-	pylab.imshow(testingInput[i,...].reshape(n0, n1))
-	pylab.title('{} ({})'.format(numDotsExact[i], numDots[i]))
-	pylab.axis('off')
-pylab.show()
-
-
-
-
-
-
-
+    pylab.subplot(n//10, 10, i + 1)
+    pylab.imshow(testingInput[i,...].reshape(n0, n1))
+    titleColor = 'black'
+    if int(numDotsExact[i]) != numpy.round(numDots[i]):
+        titleColor = 'red'
+    pylab.title('{} ({})'.format(numDotsExact[i], numDots[i]),
+        fontsize=8, color=titleColor)
+    pylab.axis('off')
+if args.plot:
+    pylab.show()
+else:
+    pylab.savefig('someResults.png', dpi=300)
 
