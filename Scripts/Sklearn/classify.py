@@ -22,33 +22,33 @@ args = parser.parse_args()
 numpy.random.seed(args.seed)
 
 def loadImages(filenames):
-	"""
-	Load image files as grey data arrays
-	@param filenames list of jpg file names
-	@return array of grey pixel data (1=white, 0=black)
-	"""
-	# open first file to get the image size
-	im = cv2.imread(filenames[0])
-	n0, n1 = im.shape[:2]
-	numImages = len(filenames)
-	inputData = numpy.zeros((numImages, n0*n1), numpy.float32)
-	for i in range(numImages):
-		fn = filenames[i]
-		# extract the index from the file name
-		index = int(re.search(r'img(\d+).jpg', fn).group(1)) - 1
-		im = cv2.imread(fn)
+    """
+    Load image files as grey data arrays
+    @param filenames list of jpg file names
+    @return array of grey pixel data (1=white, 0=black)
+    """
+    # open first file to get the image size
+    im = cv2.imread(filenames[0])
+    n0, n1 = im.shape[:2]
+    numImages = len(filenames)
+    inputData = numpy.zeros((numImages, n0*n1), numpy.float32)
+    for i in range(numImages):
+        fn = filenames[i]
+        # extract the index from the file name
+        index = int(re.search(r'img(\d+).jpg', fn).group(1)) - 1
+        im = cv2.imread(fn)
     # average the R, G, B channels and flatten array
-		inputData[index,:] = (im.mean(axis=2)/255.).flat
-	return inputData
+        inputData[index,:] = (im.mean(axis=2)/255.).flat
+    return inputData
 
 def getImageSizes(filename):
-	"""
-	Get the number of x and y pixels
-	@parameter filename file name
-	@return nx, ny
-	"""
-	im = cv2.imread(filename)
-	return im.shape[:2]
+    """
+    Get the number of x and y pixels
+    @parameter filename file name
+    @return nx, ny
+    """
+    im = cv2.imread(filename)
+    return im.shape[:2]
 
 
 trainingDir = args.trainDir
