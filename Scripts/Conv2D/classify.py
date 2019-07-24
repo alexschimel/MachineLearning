@@ -106,6 +106,8 @@ clf.compile(optimizer='adam',
 # now train
 clf.fit(trainingInput, trainingOutput, epochs=10)
 
+print(clf.summary())
+
 # test
 predictions = numpy.squeeze(clf.predict(testingInput))
 numPredictions = predictions.shape[0]
