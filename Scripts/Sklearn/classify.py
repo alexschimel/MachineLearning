@@ -103,6 +103,10 @@ print('known number of dots for the first {} testing images: {}'.format(nImages,
 print('inferred number dots for the first {} testing images: {}'.format(nImages, numDots[:nImages]))
 
 # plot training/test dataset
+import matplotlib
+if args.save:
+    # does not require X
+    matplotlib.use('Agg')
 from matplotlib import pylab
 n = 50
 for i in range(n):
