@@ -13,9 +13,8 @@ parser.add_argument('--trainDir', default='../../Data/Synthetic/Dots/train',
                     help='Path to the training data directory')
 parser.add_argument('--testDir', default='../../Data/Synthetic/Dots/test',
                     help='Path to the testing data directory')
-parser.add_argument('--plot', action='store_false',
-                    help='Turn off plotting')
-
+parser.add_argument('--save', default='',
+                    help='Turn plot in file')
 
 args = parser.parse_args()
 
@@ -114,7 +113,7 @@ for i in range(n):
     pylab.title('{} ({:.1f})'.format(int(exactNumDots[i]), predictedNumDots[i]),
         fontsize=8, color=titleColor)
     pylab.axis('off')
-if args.plot:
+if not args.save:
     pylab.show()
 else:
-    pylab.savefig('someResults.png', dpi=300)
+    pylab.savefig(args.save, dpi=300)
