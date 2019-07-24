@@ -10,9 +10,9 @@ import re
 parser = argparse.ArgumentParser(description='Count the dots.')
 parser.add_argument('--seed', type=int, default=13435, 
                     help='Random seed')
-parser.add_argument('--trainDir', default='../../Data/Synthetic/Dots/train/',
+parser.add_argument('--trainDir', default='../../Data/Synthetic/Dots/train',
                     help='Path to the training data directory')
-parser.add_argument('--testDir', default='../../Data/Synthetic/Dots/test/',
+parser.add_argument('--testDir', default='../../Data/Synthetic/Dots/test',
                     help='Path to the testing data directory')
 parser.add_argument('--plot', action='store_false',
                     help='Turn off plotting')
@@ -56,7 +56,7 @@ def getImageSizes(filename):
 trainingDir = args.trainDir
 print('train directory: {}'.format(trainingDir))
 
-df = pandas.read_csv(trainingDir + 'train.csv')
+df = pandas.read_csv(trainingDir + '/train.csv')
 categories = df['numberOfDots'].unique()
 categories.sort()
 minNumDots = min(categories)
@@ -64,7 +64,7 @@ maxNumDots = max(categories)
 numCategories = maxNumDots - minNumDots + 1
 # labels start at zero
 trainingOutput = (numpy.array(df['numberOfDots'], numpy.float32) - minNumDots)/(maxNumDots - minNumDots)
-trainingInput = loadImages(glob.glob(trainingDir + 'img*.jpg'))
+trainingInput = loadImages(glob.glob(trainingDir + '/img*.jpg'))
 
 testingDir = args.testDir
 print('test directory: {}'.format(testingDir))
@@ -73,10 +73,10 @@ df = pandas.read_csv(testingDir + '/test.csv')
 numCategories = len(categories)
 # labels start at zero
 testingOutput = (numpy.array(df['numberOfDots'], numpy.float32) - minNumDots)/(maxNumDots - minNumDots)
-testingInput = loadImages(glob.glob(testingDir + 'img*.jpg'))
+testingInput = loadImages(glob.glob(testingDir + '/img*.jpg'))
 
 # train the model
-n0, n1 = getImageSizes(trainingDir + 'img1.jpg')
+n0, n1 = getImageSizes(trainingDir + '/img1.jpg')
 print('Number of training images: {}'.format(trainingInput.shape[0]))
 print('Number of testing images : {}'.format(testingInput.shape[0]))
 print('Image size               : {} x {}'.format(n0, n1))
