@@ -2,6 +2,7 @@ import numpy
 import random
 from matplotlib import pylab
 import os
+import pandas
 import argparse
 
 parser = argparse.ArgumentParser(description='Create onion cross sections.')
@@ -17,6 +18,8 @@ parser.add_argument('--nt', type=int, default=128,
                     help='Number of points used for each circle')
 parser.add_argument('--outputDir', default='../../Data/Synthetic/Onions/',
                     help='Output directory')
+parser.add_argument('--csvFile', default='train.csv',
+                    help='Set CSV file name containing number of features for each image')
 args = parser.parse_args()
 
 
@@ -58,12 +61,14 @@ class Onion(object):
         pylab.close()
 
 
-for i in range(args.minRange, args.maxRange + 1):
-    try:
-        os.makedirs('{}/{}'.format(args.outputDir, i))
-    except:
-        pass
+try:
+    os.makedirs('{}'.format(args.outputDir))
+except:
+    pass
 
+
+imageId = numpy.zeros((args.numberOfImages,), numpy.int)
+numberOfRings = numpy.zeros((args.numberOfImages,), numpy.int)
 for i in range(args.numberOfImages):
 
     nr = args.minRange + int((args.maxRange - args.minRange)*numpy.random.random() + 0.5)
@@ -73,6 +78,12 @@ for i in range(args.numberOfImages):
 
     on = Onion(nr=nr, nt=args.nt)
     on.setProperties(elong=elong, triang=triang)
-    filename = '{}{}/img{}.png'.format(args.outputDir, on.nr, i)
+    filename = '{}/img{}.png'.format(args.outputDir, i)
     print('saving file {}...'.format(filename))
     on.saveImage(filename)
+
+    imageId[i] = i
+    numberOfRings[i] = nr
+
+df = pandas.DataFrame(list(zip(imageId, numberOfRings)), columns=['imageId', 'numberOfFeatures'])
+df.to_csv(args.outputDir + '/' + args.csvFile)
