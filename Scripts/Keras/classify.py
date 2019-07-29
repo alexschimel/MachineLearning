@@ -7,7 +7,7 @@ import glob
 import pandas
 import re
 
-parser = argparse.ArgumentParser(description='Count the dots.')
+parser = argparse.ArgumentParser(description='Count the features.')
 parser.add_argument('--seed', type=int, default=13435, 
                     help='Random seed')
 parser.add_argument('--trainDir', default='../../Data/Synthetic/Dots/train',
@@ -35,21 +35,20 @@ def loadImages(filenames):
     n0, n1 = im.shape[:2]
     numImages = len(filenames)
     inputData = numpy.zeros((numImages, n0*n1), numpy.float32)
-    for i in range(numImages):
-        fn = filenames[i]
-        # extract the index from the file name, note: the index starts with 1
-        index = int(re.search(r'img(\d+).jpg', fn).group(1)) - 1
+    for fn in filenames:
         im = cv2.imread(fn)
+        # extract the index from the file name, note: the index starts with 1
+        index = int(re.search('img(\d+)\.', fn).group(1)) - 1
         inputData[index,:] = (im.mean(axis=2)/255.).flat
     return inputData
 
-def getImageSizes(filename):
+def getImageSizes(filenames):
     """
     Get the number of x and y pixels
-    @parameter filename file name
+    @parameter filenames file names
     @return nx, ny
     """
-    im = cv2.imread(filename)
+    im = cv2.imread(filenames[0])
     return im.shape[:2]
 
 
@@ -57,30 +56,29 @@ trainingDir = args.trainDir
 print('train directory: {}'.format(trainingDir))
 
 df = pandas.read_csv(trainingDir + '/train.csv')
-categories = df['numberOfDots'].unique()
+categories = df['numberOfFeatures'].unique()
 categories.sort()
-minNumDots = min(categories)
-maxNumDots = max(categories)
-numCategories = maxNumDots - minNumDots + 1
+minNumFeatures = min(categories)
+maxNumFeatures = max(categories)
 # labels start at zero
-trainingOutput = (numpy.array(df['numberOfDots'], numpy.float32) - minNumDots)/(maxNumDots - minNumDots)
-trainingInput = loadImages(glob.glob(trainingDir + '/img*.jpg'))
+trainingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumFeatures)/(maxNumFeatures - minNumFeatures)
+filenames = glob.glob(trainingDir + '/img*.???')
+n0, n1 = getImageSizes(filenames)
+trainingInput = loadImages(filenames)
 
 testingDir = args.testDir
 print('test directory: {}'.format(testingDir))
 
 df = pandas.read_csv(testingDir + '/test.csv')
-numCategories = len(categories)
 # labels start at zero
-testingOutput = (numpy.array(df['numberOfDots'], numpy.float32) - minNumDots)/(maxNumDots - minNumDots)
-testingInput = loadImages(glob.glob(testingDir + '/img*.jpg'))
+testingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumFeatures)/(maxNumFeatures - minNumFeatures)
+testingInput = loadImages(glob.glob(testingDir + '/img*.???'))
 
 # train the model
-n0, n1 = getImageSizes(trainingDir + '/img1.jpg')
 print('Number of training images: {}'.format(trainingInput.shape[0]))
 print('Number of testing images : {}'.format(testingInput.shape[0]))
 print('Image size               : {} x {}'.format(n0, n1))
-print('Categories               : {} min/max = {}/{}'.format(categories, minNumDots, maxNumDots))
+print('Categories               : {} min/max = {}/{}'.format(categories, minNumFeatures, maxNumFeatures))
 
 
 clf = keras.Sequential()
@@ -97,18 +95,18 @@ clf.fit(trainingInput, trainingOutput, epochs=100)
 predictions = numpy.squeeze(clf.predict(testingInput))
 numPredictions = predictions.shape[0]
 
-predictedNumDots = (maxNumDots - minNumDots)*predictions + minNumDots
-exactNumDots = (maxNumDots - minNumDots)*testingOutput + minNumDots
+predictedNumFeatures = (maxNumFeatures - minNumFeatures)*predictions + minNumFeatures
+exactNumFeatures = (maxNumFeatures - minNumFeatures)*testingOutput + minNumFeatures
 
 # compute varError
-diffs = (numpy.round(predictedNumDots) - exactNumDots)**2
+diffs = (numpy.round(predictedNumFeatures) - exactNumFeatures)**2
 varError = diffs.sum()
 numFailures = (diffs != 0).sum()
 
 print('sum of errors squared = {} number of failures = {} ({} %)'.format(varError, numFailures, 100*numFailures/numPredictions))
 
-print('known number of dots for the first 5 images   : {}'.format(exactNumDots[:5]))
-print('inferred number of dots for the first 5 images: {}'.format(predictedNumDots[:5]))
+print('known number of features for the first 5 images   : {}'.format(exactNumFeatures[:5]))
+print('inferred number of features for the first 5 images: {}'.format(predictedNumFeatures[:5]))
 
 # plot training/test dataset
 import matplotlib
@@ -121,9 +119,9 @@ for i in range(n):
     pylab.subplot(n//10, 10, i + 1)
     pylab.imshow(testingInput[i,...].reshape(n0, n1))
     titleColor = 'black'
-    if int(exactNumDots[i]) != numpy.round(predictedNumDots[i]):
+    if int(exactNumFeatures[i]) != numpy.round(predictedNumFeatures[i]):
         titleColor = 'red'
-    pylab.title('{} ({:.1f})'.format(int(exactNumDots[i]), predictedNumDots[i]), 
+    pylab.title('{} ({:.1f})'.format(int(exactNumFeatures[i]), predictedNumFeatures[i]), 
                 fontsize=8, color=titleColor)
     pylab.axis('off')
 if not args.save:
