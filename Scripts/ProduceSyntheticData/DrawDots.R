@@ -27,7 +27,7 @@ set.seed(options$seed)
 outputDir <- paste(options$outputDir, "/", sep='')
 dir.create(outputDir, showWarnings=FALSE, recursive=TRUE)
 
-df <- data.frame("imageId"=rep(0, options$numberOfImages), "numberOfDots"=options$numberOfImages)
+df <- data.frame("imageId"=rep(0, options$numberOfImages), "numberOfFeatures"=options$numberOfImages)
 
 for(i in 1:options$numberOfImages) {
 
@@ -47,7 +47,7 @@ for(i in 1:options$numberOfImages) {
     extent <- runif(numDots, min = 0.2, max = 1)
     
     df[i,"imageId"] = i
-    df[i, "numberOfDots"] = numDots
+    df[i, "numberOfFeatures"] = numDots
 
 
     jpeg(filename=paste(outputDir, "img", i, ".jpg", sep = ""), 

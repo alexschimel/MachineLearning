@@ -55,20 +55,20 @@ def getImageSizes(filename):
 trainingDir = args.trainDir
 
 df = pandas.read_csv(trainingDir + '/train.csv')
-categories = df['numberOfDots'].unique()
+categories = df['numberOfFeatures'].unique()
 categories.sort()
 minNumDots = min(categories)
 maxNumDots = max(categories)
 numCategories = maxNumDots - minNumDots + 1
 # labels start at zero
-trainingOutput = (numpy.array(df['numberOfDots'], numpy.float32) - minNumDots)/(maxNumDots - minNumDots)
+trainingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumDots)/(maxNumDots - minNumDots)
 trainingInput = loadImages(glob.glob(trainingDir + '/img*.jpg'))
 
 testingDir = args.testDir
 df = pandas.read_csv(testingDir + '/test.csv')
 numCategories = len(categories)
 # labels start at zero
-testingOutput = (numpy.array(df['numberOfDots'], numpy.float32) - minNumDots)/(maxNumDots - minNumDots)
+testingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumDots)/(maxNumDots - minNumDots)
 testingInput = loadImages(glob.glob(testingDir + '/img*.jpg'))
 
 # train the model
