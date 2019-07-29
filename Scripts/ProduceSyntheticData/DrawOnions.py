@@ -26,20 +26,24 @@ args = parser.parse_args()
 numpy.random.seed(args.seed)
 
 def rotate(xys, angle=0.0):
+    n = xys.shape[1]
+    xyg = xys.sum(axis=1)/float(n)
+    dx = xys[0] - xyg[0]
+    dy = xys[1] - xyg[1]
     cosa, sina = numpy.cos(alpha), numpy.sin(alpha)
-    xsPrime = cosa*xys[0] + sina*xys[1]
-    ysPrime = -sina*xys[0] + cosa*xys[1]
+    xsPrime =  cosa*dx + sina*dy
+    ysPrime = -sina*dx + cosa*dy
     return xsPrime, ysPrime
 
 
 class Onion(object):
 
-    def __init__(self, nr, nt=128):
+    def __init__(self, nr, nrMax, nt=128):
         self.ts = numpy.linspace(0., 2*numpy.pi, nt + 1)
         self.elong = 1.0
         self.triang = 0.0
         self.nr = nr
-        self.dr = 1.0/float(nr)
+        self.dr = 1.0/float(nrMax)
 
     def setProperties(self, **kw):
         self.elong = kw.get('elong', 1.0)
@@ -47,16 +51,18 @@ class Onion(object):
 
     def getXY(self, i):
         r = numpy.sqrt((i + 0.5) * self.dr)
-        xs = 1.0 + r*numpy.cos(self.ts)
-        ys = r*self.elong*numpy.sin(self.ts + self.triang*numpy.sin(self.ts))
-        return xs, ys
+        xys = numpy.zeros((2, self.ts.shape[0]), numpy.float64)
+        xys[0,:] = 1.0 + r*numpy.cos(self.ts)
+        xys[1,:] = r*self.elong*numpy.sin(self.ts + self.triang*numpy.sin(self.ts))
+        return xys
 
     def saveImage(self, filename, alpha=0.0):
         for i in range(self.nr):
             xs, ys = rotate(self.getXY(i), alpha)
             pylab.plot(xs, ys, 'k-')
-            pylab.axis('equal')
-            pylab.axis('off')
+        pylab.plot([-1., 1.], [-1., 1.], 'k.')
+        pylab.axis('equal')
+        pylab.axis('off')
         pylab.savefig('{}'.format(filename), dpi=40)
         pylab.close()
 
@@ -71,12 +77,12 @@ imageId = numpy.zeros((args.numberOfImages,), numpy.int)
 numberOfRings = numpy.zeros((args.numberOfImages,), numpy.int)
 for i in range(args.numberOfImages):
 
-    nr = args.minRange + int((args.maxRange - args.minRange)*numpy.random.random() + 0.5)
+    nr = int(args.minRange + (args.maxRange + 0.99 - args.minRange)*numpy.random.random())
     elong = 0.8 + numpy.random.random()
     triang = 0.0 + 0.3*numpy.random.random()
     alpha = 0.0 + 2*numpy.pi*numpy.random.random()
 
-    on = Onion(nr=nr, nt=args.nt)
+    on = Onion(nr=nr, nrMax=args.maxRange, nt=args.nt)
     on.setProperties(elong=elong, triang=triang)
     filename = '{}/img{}.png'.format(args.outputDir, i)
     print('saving file {}...'.format(filename))
@@ -86,4 +92,6 @@ for i in range(args.numberOfImages):
     numberOfRings[i] = nr
 
 df = pandas.DataFrame(list(zip(imageId, numberOfRings)), columns=['imageId', 'numberOfFeatures'])
-df.to_csv(args.outputDir + '/' + args.csvFile)
+csvFile = args.outputDir + '/' + args.csvFile
+print('saving {}...'.format(csvFile))
+df.to_csv(csvFile)
