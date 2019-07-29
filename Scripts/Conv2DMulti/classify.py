@@ -26,7 +26,7 @@ numpy.random.seed(args.seed)
 def loadImages(filenames):
     """
     Load image files as grey data arrays
-    @param filenames list of jpg file names
+    @param filenames list of file images
     @return array of grey pixel data (1=white, 0=black)
     """
     # open first file to get the image size
@@ -34,21 +34,20 @@ def loadImages(filenames):
     n0, n1 = im.shape[:2]
     numImages = len(filenames)
     inputData = numpy.zeros((numImages, n0, n1, 1), numpy.float32)
-    for i in range(numImages):
-        fn = filenames[i]
+    for fn in filenames:
         # extract the index from the file name, note: the index starts with 1
-        index = int(re.search(r'img(\d+).jpg', fn).group(1)) - 1
         im = cv2.imread(fn)
+        index = int(re.search('img(\d+)\.', fn).group(1)) - 1
         inputData[index,...] = im.mean(axis=2).reshape(n0, n1, 1) / 255.
     return inputData
 
-def getImageSizes(filename):
+def getImageSizes(filenames):
     """
     Get the number of x and y pixels
-    @parameter filename file name
+    @parameter filenames file names
     @return nx, ny
     """
-    im = cv2.imread(filename)
+    im = cv2.imread(filenames[0])
     return im.shape[:2]
 
 
@@ -59,20 +58,21 @@ categories = df['numberOfFeatures'].unique()
 categories.sort()
 minNumFeatures = min(categories)
 maxNumFeatures = max(categories)
-numCategories = maxNumFeatures - minNumFeatures + 1
+
 # labels start at zero
 trainingOutput = numpy.array(df['numberOfFeatures'], numpy.int8) - minNumFeatures
-trainingInput = loadImages(glob.glob(trainingDir + '/img*.jpg'))
+filenames = glob.glob(trainingDir + '/img*.???')
+trainingInput = loadImages(filenames)
+n0, n1 = getImageSizes(filenames)
 
 testingDir = args.testDir
 df = pandas.read_csv(testingDir + '/test.csv')
 numCategories = len(categories)
 # labels start at zero
 testingOutput = numpy.array(df['numberOfFeatures'], numpy.int8) - minNumFeatures
-testingInput = loadImages(glob.glob(testingDir + '/img*.jpg'))
+testingInput = loadImages(glob.glob(testingDir + '/img*.???'))
 
 # train the model
-n0, n1 = getImageSizes(trainingDir + '/img1.jpg')
 print('Number of training images: {}'.format(trainingInput.shape[0]))
 print('Number of testing images : {}'.format(testingInput.shape[0]))
 print('Image size               : {} x {}'.format(n0, n1))

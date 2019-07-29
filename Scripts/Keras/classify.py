@@ -35,21 +35,20 @@ def loadImages(filenames):
     n0, n1 = im.shape[:2]
     numImages = len(filenames)
     inputData = numpy.zeros((numImages, n0*n1), numpy.float32)
-    for i in range(numImages):
-        fn = filenames[i]
-        # extract the index from the file name, note: the index starts with 1
-        index = int(re.search(r'img(\d+).jpg', fn).group(1)) - 1
+    for fn in filenames:
         im = cv2.imread(fn)
+        # extract the index from the file name, note: the index starts with 1
+        index = int(re.search('img(\d+)\.', fn).group(1)) - 1
         inputData[index,:] = (im.mean(axis=2)/255.).flat
     return inputData
 
-def getImageSizes(filename):
+def getImageSizes(filenames):
     """
     Get the number of x and y pixels
-    @parameter filename file name
+    @parameter filenames file names
     @return nx, ny
     """
-    im = cv2.imread(filename)
+    im = cv2.imread(filenames[0])
     return im.shape[:2]
 
 
@@ -61,22 +60,21 @@ categories = df['numberOfFeatures'].unique()
 categories.sort()
 minNumFeatures = min(categories)
 maxNumFeatures = max(categories)
-numCategories = maxNumFeatures - minNumFeatures + 1
 # labels start at zero
 trainingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumFeatures)/(maxNumFeatures - minNumFeatures)
-trainingInput = loadImages(glob.glob(trainingDir + '/img*.jpg'))
+filenames = glob.glob(trainingDir + '/img*.???')
+n0, n1 = getImageSizes(filenames)
+trainingInput = loadImages(filenames)
 
 testingDir = args.testDir
 print('test directory: {}'.format(testingDir))
 
 df = pandas.read_csv(testingDir + '/test.csv')
-numCategories = len(categories)
 # labels start at zero
 testingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumFeatures)/(maxNumFeatures - minNumFeatures)
-testingInput = loadImages(glob.glob(testingDir + '/img*.jpg'))
+testingInput = loadImages(glob.glob(testingDir + '/img*.???'))
 
 # train the model
-n0, n1 = getImageSizes(trainingDir + '/img1.jpg')
 print('Number of training images: {}'.format(trainingInput.shape[0]))
 print('Number of testing images : {}'.format(testingInput.shape[0]))
 print('Image size               : {} x {}'.format(n0, n1))

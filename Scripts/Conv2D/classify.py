@@ -34,11 +34,11 @@ def loadImages(filenames):
     n0, n1 = im.shape[:2]
     numImages = len(filenames)
     inputData = numpy.zeros((numImages, n0, n1, 1), numpy.float32)
-    index = 0
     for fn in filenames:
         im = cv2.imread(fn)
+        # img uses 1 based indexing
+        index = int(re.search('img(\d+)\.', fn).group(1)) - 1
         inputData[index,...] = im.mean(axis=2).reshape(n0, n1, 1) / 255.
-        index += 1
     return inputData
 
 def getImageSizes(filenames):
@@ -58,14 +58,12 @@ categories = df['numberOfFeatures'].unique()
 categories.sort()
 minNumFeatures = min(categories)
 maxNumFeatures = max(categories)
-numCategories = maxNumFeatures - minNumFeatures + 1
 # labels start at zero
 trainingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumFeatures)/(maxNumFeatures - minNumFeatures)
 trainingInput = loadImages(glob.glob(trainingDir + '/img*.???'))
 
 testingDir = args.testDir
 df = pandas.read_csv(testingDir + '/test.csv')
-numCategories = len(categories)
 # labels start at zero
 testingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumFeatures)/(maxNumFeatures - minNumFeatures)
 filenames = glob.glob(testingDir + '/img*.???')
