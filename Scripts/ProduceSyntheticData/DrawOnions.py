@@ -60,8 +60,7 @@ class Onion(object):
         for i in range(self.nr):
             xs, ys = rotate(self.getXY(i), alpha)
             pylab.plot(xs, ys, 'k-')
-        pylab.plot([-1., 1.], [-1., 1.], 'k.')
-        pylab.axis('equal')
+        pylab.axis([-1.5, 1.5, -1.5, 1.5])
         pylab.axis('off')
         pylab.savefig('{}'.format(filename), dpi=40)
         pylab.close()
