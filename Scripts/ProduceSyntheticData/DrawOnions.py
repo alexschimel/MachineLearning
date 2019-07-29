@@ -62,7 +62,7 @@ class Onion(object):
             pylab.plot(xs, ys, 'k-')
         pylab.axis([-1.5, 1.5, -1.5, 1.5])
         pylab.axis('off')
-        pylab.savefig('{}'.format(filename), dpi=40)
+        pylab.savefig('{}'.format(filename), dpi=20)
         pylab.close()
 
 
@@ -76,6 +76,8 @@ imageId = numpy.zeros((args.numberOfImages,), numpy.int)
 numberOfRings = numpy.zeros((args.numberOfImages,), numpy.int)
 for i in range(args.numberOfImages):
 
+    i1 = i + 1
+
     nr = int(args.minRange + (args.maxRange + 0.99 - args.minRange)*numpy.random.random())
     elong = 0.8 + numpy.random.random()
     triang = 0.0 + 0.3*numpy.random.random()
@@ -83,11 +85,11 @@ for i in range(args.numberOfImages):
 
     on = Onion(nr=nr, nrMax=args.maxRange, nt=args.nt)
     on.setProperties(elong=elong, triang=triang)
-    filename = '{}/img{}.png'.format(args.outputDir, i)
+    filename = '{}/img{}.png'.format(args.outputDir, i1)
     print('saving file {}...'.format(filename))
     on.saveImage(filename)
 
-    imageId[i] = i
+    imageId[i] = i1
     numberOfRings[i] = nr
 
 df = pandas.DataFrame(list(zip(imageId, numberOfRings)), columns=['imageId', 'numberOfFeatures'])

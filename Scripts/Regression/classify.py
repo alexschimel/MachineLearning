@@ -5,6 +5,8 @@ import cv2
 import glob
 import pandas
 import re
+import matplotlib
+from matplotlib import pylab
 
 parser = argparse.ArgumentParser(description='Count features.')
 parser.add_argument('--seed', type=int, default=13435, 
@@ -33,11 +35,11 @@ def loadImages(filenames):
     n0, n1 = im.shape[:2]
     numImages = len(filenames)
     inputData = numpy.zeros((numImages, n0, n1), numpy.float32)
-    index = 0
     for fn in filenames:
         im = cv2.imread(fn)
+        # img uses 1 based indexing
+        index = int(re.search('img(\d+)\.', fn).group(1)) - 1
         inputData[index,...] = im.mean(axis=2) / 255.
-        index += 1
     return inputData
 
 def getImageSizes(filenames):
@@ -57,22 +59,20 @@ categories = df['numberOfFeatures'].unique()
 categories.sort()
 minNumFeatures = min(categories)
 maxNumFeatures = max(categories)
-numCategories = maxNumFeatures - minNumFeatures + 1
 # labels start at zero
-trainingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumFeatures)/(maxNumFeatures - minNumFeatures)
+trainingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumFeatures)/float(maxNumFeatures - minNumFeatures)
 filenames = glob.glob(trainingDir + '/img*.???')
 trainingInput = loadImages(filenames)
+n0, n1 = getImageSizes(filenames)
 
 testingDir = args.testDir
 
 df = pandas.read_csv(testingDir + '/test.csv')
-numCategories = len(categories)
 # labels start at zero
-testingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumFeatures)/(maxNumFeatures - minNumFeatures)
+testingOutput = (numpy.array(df['numberOfFeatures'], numpy.float32) - minNumFeatures)/float(maxNumFeatures - minNumFeatures)
 testingInput = loadImages(glob.glob(testingDir + '/img*.???'))
 
 # train the model
-n0, n1 = getImageSizes(filenames)
 print('Number of training images: {}'.format(trainingInput.shape[0]))
 print('Number of testing images : {}'.format(testingInput.shape[0]))
 print('Image size               : {} x {}'.format(n0, n1))
@@ -86,7 +86,6 @@ clf.fit(trainingInput.reshape(-1, n0*n1), trainingOutput)
 
 # test
 predictions = clf.predict(testingInput.reshape(-1, n0*n1))
-
 numPredictions = predictions.shape[0]
 predictedNumFeatures = (maxNumFeatures - minNumFeatures)*predictions + minNumFeatures
 exactNumFeatures = (maxNumFeatures - minNumFeatures)*testingOutput + minNumFeatures
@@ -102,11 +101,9 @@ print('known number of features for the first 5 images   : {}'.format(exactNumFe
 print('inferred number of features for the first 5 images: {}'.format(predictedNumFeatures[:5]))
 
 # plot training/test dataset
-import matplotlib
 if args.save:
     # does not require X
     matplotlib.use('Agg')
-from matplotlib import pylab
 n = 50
 for i in range(n):
     pylab.subplot(n//10, 10, i + 1)
