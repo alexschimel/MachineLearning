@@ -37,10 +37,4 @@ The best solution has the lowest variance = sum (num of circles detected - numbe
 
 ## FAQs
 
-
-
-
-
-
-
- 
+Alex - Testing a change after forking project. Please delete
