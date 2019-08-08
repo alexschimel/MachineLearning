@@ -36,5 +36,3 @@ Rscript DrawDots.R -o ../../Data/Synthetic/Dots/test -c test.csv -n 200 -r 1 -R 
 The best solution has the lowest variance = sum (num of circles detected - number of circles)^2
 
 ## FAQs
-
-Alex - Testing a change after forking project. Please delete
