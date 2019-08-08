@@ -1,4 +1,3 @@
-test
 # Machine Learning Sandbox - Comparing Different Classification Solutions
 
 ## Why this project
